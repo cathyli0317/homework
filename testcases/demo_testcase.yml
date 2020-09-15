@@ -1,0 +1,46 @@
+- config:
+    name: "GetProductById-Api test cases"
+    verify: False
+    variables:
+      sku: ${create_sku()}
+      uniqueRefId: ${get_unique_refid()}
+      receiptNumber: ${create_uuid_15()}
+      timeZoneUTC: ${get_datetime()}
+    base_url: ${ENV(PUBLIC_API_BASE_URL)}
+
+
+- test:
+    name: "Get a product by ID"
+    api: /api/getProductbyId.yml
+    validate:
+      - eq: [status_code, 200]
+      - eq: [content.id, $productId]
+
+- test:
+    name: "Get a product by ID"
+    request:
+        url: /products/123456
+        method: GET
+    validate:
+      - eq: [status_code, 400]
+      - eq: [content.code, "ResourceNotFound"]
+
+- test:
+    name: "Get a product by ID"
+    request:
+        url: /products/$productId
+        method: GET
+        headers:
+            Authorization: "BASIC wrong_token"
+    validate:
+      - eq: [code, "Forbidden"]
+
+- test:
+    name: "Get a product by ID"
+    request:
+        url: /products/$productId
+        method: GET
+        headers:
+            Authorization: "Basic dWlhdXRvbWF0aW9uOmQ0YjkxMWJiMGE4MjQ0NDU5YzcxMmNjNjEzNTQ4ZjMz"
+    validate:
+      - eq: [code, "NotAuthorized"]
